@@ -16,6 +16,16 @@ async function fetchJson(url) {
     return response.json();
 }
 
+function isValidHttpUrl(string) {
+    if (!string) return false;
+    try {
+        const url = new URL(string);
+        return url.protocol === "http:" || url.protocol === "https:";
+    } catch (_) {
+        return false;
+    }
+}
+
 function createStoryCard(story) {
     const card = document.createElement('article');
     card.className = 'story-card';
@@ -29,7 +39,7 @@ function createStoryCard(story) {
     
     const title = document.createElement('h3');
     const link = document.createElement('a');
-    const storyUrl = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
+    const storyUrl = isValidHttpUrl(story.url) ? story.url : `https://news.ycombinator.com/item?id=${story.id}`;
     link.href = storyUrl;
     link.textContent = story.title;
     link.target = '_blank';
