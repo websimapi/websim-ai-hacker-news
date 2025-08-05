@@ -29,11 +29,20 @@ function createStoryCard(story) {
     
     const title = document.createElement('h3');
     const link = document.createElement('a');
-    link.href = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
+    const storyUrl = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
+    link.href = storyUrl;
     link.textContent = story.title;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     title.appendChild(link);
+
+    link.addEventListener('click', (e) => {
+        // Only override primary button clicks without modifier keys
+        if (e.button === 0 && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            openIframeModal(storyUrl);
+        }
+    });
 
     const meta = document.createElement('div');
     meta.className = 'story-meta';
@@ -46,15 +55,6 @@ function createStoryCard(story) {
     content.appendChild(meta);
     card.appendChild(imageContainer);
     card.appendChild(content);
-
-    card.addEventListener('click', (e) => {
-        // Don't open iframe if an actual link was clicked. Let it do its default action.
-        if (e.target.closest('a')) {
-            return;
-        }
-        const storyUrl = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
-        openIframe(storyUrl);
-    });
 
     return { card, imageContainer };
 }
@@ -88,30 +88,17 @@ async function generateAndLoadImage(story, imageContainer) {
     }
 }
 
-function openIframe(url) {
-    if (!url) {
-        console.warn('No URL to open in iframe');
-        return;
-    }
+function openIframeModal(url) {
     storyIframe.src = url;
     iframeModal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.classList.add('modal-open');
 }
 
-function closeIframe() {
+function closeIframeModal() {
     iframeModal.classList.add('hidden');
     storyIframe.src = 'about:blank'; // Stop loading and clear content
-    document.body.style.overflow = ''; // Restore scrolling
+    document.body.classList.remove('modal-open');
 }
-
-// Event listeners for closing the modal
-closeIframeBtn.addEventListener('click', closeIframe);
-
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !iframeModal.classList.contains('hidden')) {
-        closeIframe();
-    }
-});
 
 async function main() {
     try {
@@ -140,5 +127,7 @@ async function main() {
         errorContainer.classList.remove('hidden');
     }
 }
+
+closeIframeBtn.addEventListener('click', closeIframeModal);
 
 main();
