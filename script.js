@@ -3,6 +3,7 @@ const STORIES_TO_LOAD = 16;
 
 const loadingIndicator = document.getElementById('loading-indicator');
 const storiesGrid = document.getElementById('stories-grid');
+const errorContainer = document.getElementById('error-container');
 
 async function fetchJson(url) {
     const response = await fetch(url);
@@ -97,9 +98,10 @@ async function main() {
 
     } catch (error) {
         console.error('Failed to load stories:', error);
-        loadingIndicator.innerHTML = '<p>Could not load stories. Please try again later.</p>';
+        loadingIndicator.classList.add('hidden');
+        errorContainer.innerHTML = '<p>Could not load stories. Please try again later.</p>';
+        errorContainer.classList.remove('hidden');
     }
 }
 
 main();
-
