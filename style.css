@@ -56,6 +56,7 @@ main {
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
 }
 
 .story-card:hover {
@@ -167,6 +168,43 @@ main {
     padding: 4rem;
     font-size: 1.2rem;
     color: #65676b;
+}
+
+#iframe-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+#close-iframe-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 3rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    z-index: 1001;
+}
+
+#story-iframe {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border: none;
+    border-radius: 8px;
 }
 
 .hidden {

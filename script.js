@@ -4,6 +4,9 @@ const STORIES_TO_LOAD = 16;
 const loadingIndicator = document.getElementById('loading-indicator');
 const storiesGrid = document.getElementById('stories-grid');
 const errorContainer = document.getElementById('error-container');
+const iframeModal = document.getElementById('iframe-modal');
+const storyIframe = document.getElementById('story-iframe');
+const closeIframeBtn = document.getElementById('close-iframe-btn');
 
 async function fetchJson(url) {
     const response = await fetch(url);
@@ -44,6 +47,15 @@ function createStoryCard(story) {
     card.appendChild(imageContainer);
     card.appendChild(content);
 
+    card.addEventListener('click', (e) => {
+        // Don't open iframe if an actual link was clicked. Let it do its default action.
+        if (e.target.closest('a')) {
+            return;
+        }
+        const storyUrl = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
+        openIframe(storyUrl);
+    });
+
     return { card, imageContainer };
 }
 
@@ -75,6 +87,31 @@ async function generateAndLoadImage(story, imageContainer) {
         imageContainer.classList.remove('loading');
     }
 }
+
+function openIframe(url) {
+    if (!url) {
+        console.warn('No URL to open in iframe');
+        return;
+    }
+    storyIframe.src = url;
+    iframeModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeIframe() {
+    iframeModal.classList.add('hidden');
+    storyIframe.src = 'about:blank'; // Stop loading and clear content
+    document.body.style.overflow = ''; // Restore scrolling
+}
+
+// Event listeners for closing the modal
+closeIframeBtn.addEventListener('click', closeIframe);
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !iframeModal.classList.contains('hidden')) {
+        closeIframe();
+    }
+});
 
 async function main() {
     try {
