@@ -16,16 +16,6 @@ async function fetchJson(url) {
     return response.json();
 }
 
-function isValidHttpUrl(string) {
-    if (!string) return false;
-    try {
-        const url = new URL(string);
-        return url.protocol === "http:" || url.protocol === "https:";
-    } catch (_) {
-        return false;
-    }
-}
-
 function createStoryCard(story) {
     const card = document.createElement('article');
     card.className = 'story-card';
@@ -39,7 +29,7 @@ function createStoryCard(story) {
     
     const title = document.createElement('h3');
     const link = document.createElement('a');
-    const storyUrl = isValidHttpUrl(story.url) ? story.url : `https://news.ycombinator.com/item?id=${story.id}`;
+    const storyUrl = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
     link.href = storyUrl;
     link.textContent = story.title;
     link.target = '_blank';
@@ -50,7 +40,7 @@ function createStoryCard(story) {
         // Only override primary button clicks without modifier keys
         if (e.button === 0 && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
-            openIframeModal(storyUrl);
+            openIframeModal(storyUrl, story.id);
         }
     });
 
@@ -98,10 +88,32 @@ async function generateAndLoadImage(story, imageContainer) {
     }
 }
 
-function openIframeModal(url) {
-    storyIframe.src = url;
+function openIframeModal(url, storyId) {
+    iframeModal.classList.add('loading');
     iframeModal.classList.remove('hidden');
     document.body.classList.add('modal-open');
+
+    storyIframe.onload = () => {
+        iframeModal.classList.remove('loading');
+        try {
+            // This will throw a security error for a cross-origin frame, which is expected.
+            // If it *doesn't* throw, it means the page is on the same origin (e.g. about:blank)
+            // because the browser blocked the request (e.g. X-Frame-Options).
+            const x = storyIframe.contentWindow.location.href;
+
+            // If we get here, the page failed to load (likely blocked).
+            // Load the fallback Hacker News URL.
+            console.log(`Iframe failed to load ${url}. Falling back to HN.`);
+            storyIframe.src = `https://news.ycombinator.com/item?id=${storyId}`;
+
+        } catch (e) {
+            // This is the success case for a cross-origin iframe.
+            console.log(`Iframe loaded ${url} successfully.`);
+        }
+    };
+    
+    // Set src after onload is defined
+    storyIframe.src = url;
 }
 
 function closeIframeModal() {
